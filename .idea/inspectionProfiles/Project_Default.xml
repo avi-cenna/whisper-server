@@ -1,0 +1,145 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyChainedComparisonsInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoreConstantInTheMiddle" value="true" />
+    </inspection_tool>
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="64">
+            <item index="0" class="java.lang.String" itemvalue="pandas" />
+            <item index="1" class="java.lang.String" itemvalue="skyfield" />
+            <item index="2" class="java.lang.String" itemvalue="numpy" />
+            <item index="3" class="java.lang.String" itemvalue="pyzmq" />
+            <item index="4" class="java.lang.String" itemvalue="python-dateutil" />
+            <item index="5" class="java.lang.String" itemvalue="humanize" />
+            <item index="6" class="java.lang.String" itemvalue="pytz" />
+            <item index="7" class="java.lang.String" itemvalue="devtools" />
+            <item index="8" class="java.lang.String" itemvalue="pyodbc" />
+            <item index="9" class="java.lang.String" itemvalue="SQLAlchemy" />
+            <item index="10" class="java.lang.String" itemvalue="python-gnupg" />
+            <item index="11" class="java.lang.String" itemvalue="pickleshare" />
+            <item index="12" class="java.lang.String" itemvalue="psycopg2-binary" />
+            <item index="13" class="java.lang.String" itemvalue="envs" />
+            <item index="14" class="java.lang.String" itemvalue="fsspec" />
+            <item index="15" class="java.lang.String" itemvalue="PyNaCl" />
+            <item index="16" class="java.lang.String" itemvalue="Pygments" />
+            <item index="17" class="java.lang.String" itemvalue="oauthlib" />
+            <item index="18" class="java.lang.String" itemvalue="soupsieve" />
+            <item index="19" class="java.lang.String" itemvalue="google-api-core" />
+            <item index="20" class="java.lang.String" itemvalue="google-crc32c" />
+            <item index="21" class="java.lang.String" itemvalue="pyperclip" />
+            <item index="22" class="java.lang.String" itemvalue="graphql-core" />
+            <item index="23" class="java.lang.String" itemvalue="cryptography" />
+            <item index="24" class="java.lang.String" itemvalue="google" />
+            <item index="25" class="java.lang.String" itemvalue="typing-extensions" />
+            <item index="26" class="java.lang.String" itemvalue="pexpect" />
+            <item index="27" class="java.lang.String" itemvalue="appnope" />
+            <item index="28" class="java.lang.String" itemvalue="attrs" />
+            <item index="29" class="java.lang.String" itemvalue="bcrypt" />
+            <item index="30" class="java.lang.String" itemvalue="jedi" />
+            <item index="31" class="java.lang.String" itemvalue="boto3" />
+            <item index="32" class="java.lang.String" itemvalue="paramiko" />
+            <item index="33" class="java.lang.String" itemvalue="backcall" />
+            <item index="34" class="java.lang.String" itemvalue="google-cloud-core" />
+            <item index="35" class="java.lang.String" itemvalue="decorator" />
+            <item index="36" class="java.lang.String" itemvalue="ptyprocess" />
+            <item index="37" class="java.lang.String" itemvalue="wcwidth" />
+            <item index="38" class="java.lang.String" itemvalue="google-cloud-storage" />
+            <item index="39" class="java.lang.String" itemvalue="storage" />
+            <item index="40" class="java.lang.String" itemvalue="sqlparse" />
+            <item index="41" class="java.lang.String" itemvalue="requests-oauthlib" />
+            <item index="42" class="java.lang.String" itemvalue="prompt-toolkit" />
+            <item index="43" class="java.lang.String" itemvalue="urllib3" />
+            <item index="44" class="java.lang.String" itemvalue="python-jose" />
+            <item index="45" class="java.lang.String" itemvalue="six" />
+            <item index="46" class="java.lang.String" itemvalue="botocore" />
+            <item index="47" class="java.lang.String" itemvalue="google-auth-oauthlib" />
+            <item index="48" class="java.lang.String" itemvalue="parso" />
+            <item index="49" class="java.lang.String" itemvalue="pysftp" />
+            <item index="50" class="java.lang.String" itemvalue="ecdsa" />
+            <item index="51" class="java.lang.String" itemvalue="google-cloud" />
+            <item index="52" class="java.lang.String" itemvalue="ipython" />
+            <item index="53" class="java.lang.String" itemvalue="ctds" />
+            <item index="54" class="java.lang.String" itemvalue="chardet" />
+            <item index="55" class="java.lang.String" itemvalue="jmespath" />
+            <item index="56" class="java.lang.String" itemvalue="s3transfer" />
+            <item index="57" class="java.lang.String" itemvalue="cachetools" />
+            <item index="58" class="java.lang.String" itemvalue="pycognito" />
+            <item index="59" class="java.lang.String" itemvalue="aiohttp" />
+            <item index="60" class="java.lang.String" itemvalue="multidict" />
+            <item index="61" class="java.lang.String" itemvalue="yarl" />
+            <item index="62" class="java.lang.String" itemvalue="gcsfs" />
+            <item index="63" class="java.lang.String" itemvalue="google-auth" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E127" />
+          <option value="E501" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N806" />
+          <option value="N803" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="SqlAddNotNullColumnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlAggregatesInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlAmbiguousColumnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlAutoIncrementDuplicateInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlCallNotationInspection" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="SqlCaseVsCoalesceInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlCaseVsIfInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlCheckUsingColumnsInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlConstantConditionInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlConstantExpressionInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlCurrentSchemaInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlDeprecateTypeInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlDerivedTableAliasInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlDialectInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlDropIndexedColumnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlDtInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlDuplicateColumnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlIdentifierInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlIllegalCursorStateInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlInsertIntoGeneratedColumnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlInsertNullIntoNotNullInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlInsertValuesInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlJoinWithoutOnInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlMisleadingReferenceInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlMissingReturnInspection" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="SqlMultipleLimitClausesInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlNoDataSourceInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlNullComparisonInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlRedundantAliasInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlRedundantCodeInCoalesceInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlRedundantElseNullInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlRedundantLimitInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlRedundantOrderingDirectionInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlResolveInspection" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="SqlShadowingAliasInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlShouldBeInGroupByInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlSideEffectsInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlSignatureInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlStorageInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlStringLengthExceededInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlTransactionStatementInTriggerInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlTriggerTransitionInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlTypeInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlUnicodeStringLiteralInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlUnreachableCodeInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlUnusedCteInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlUnusedSubqueryItemInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlUnusedVariableInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SqlWithoutWhereInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+  </profile>
+</component>
