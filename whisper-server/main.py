@@ -12,7 +12,9 @@ app = Typer()
 
 @app.command()
 def serve(
-    auto_stop: Annotated[bool, Argument(help="If True, the server will stop automatically")] = True
+    auto_stop: Annotated[
+        bool, Argument(help="If True, the server will stop automatically")
+    ] = True
 ):
     """Serve the Whisper transcription service, receiving ZMQ messages and returning transcriptions."""
     server.main()

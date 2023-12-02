@@ -1,6 +1,6 @@
 import os
-import threading
 import tempfile
+import threading
 import wave
 
 from pathlib import Path
@@ -10,15 +10,16 @@ import sounddevice as sd
 import webrtcvad
 import zmq
 
+from config import WhisperServerConfig, load_config
 from faster_whisper import WhisperModel
 from loguru import logger
 
 
-def record(config=None) -> Path:
+def record(config: WhisperServerConfig) -> Path:
     sample_rate = 16000
     frame_duration = 30  # 30ms, supported values: 10, 20, 30
     buffer_duration = 300  # 300ms
-    silence_duration = config["silence_duration"] if config else 2200  # 900ms
+    silence_duration = config.silence_duration
 
     vad = webrtcvad.Vad(3)  # Aggressiveness mode: 3 (highest)
     buffer = []
@@ -41,7 +42,7 @@ def record(config=None) -> Path:
                 continue
 
             frame = buffer[: sample_rate * frame_duration // 1000]
-            buffer = buffer[sample_rate * frame_duration // 1000:]
+            buffer = buffer[sample_rate * frame_duration // 1000 :]
 
             is_speech = vad.is_speech(np.array(frame).tobytes(), sample_rate)
             if is_speech:
@@ -68,21 +69,24 @@ def record(config=None) -> Path:
         return Path(temp_audio_file.name)
 
 
-def transcribe(wavfile: Path):
-    # model_size = "medium.en"
-    # model_size = "tiny.en"
-    model_size = "small.en"
-    model = WhisperModel(model_size, compute_type="float32")
-    # model_size_or_path: Size of the model to use (tiny, tiny.en, base, base.en,
-    #  small, small.en, medium, medium.en, large-v1, large-v2, or large), a path to a converted
-    #  model directory, or a CTranslate2-converted Whisper model ID from the Hugging Face Hub.
-    #  When a size or a model ID is configured, the converted model is downloaded
-    #  from the Hugging Face Hub.
+def transcribe(wavfile: Path, config: WhisperServerConfig):
+    model_cfg = config.whisper_model_config
+    model = WhisperModel(
+        model_cfg.model_size_or_path,
+        device=model_cfg.device,
+        compute_type=model_cfg.compute_type,
+    )
+
     logger.debug("Starting transcription")
-    init = """ """
-    segments, info = model.transcribe(wavfile.as_posix(), language="en", initial_prompt=init)
+    transciption_cfg = config.transcription_config
+    segments, info = model.transcribe(
+        wavfile.as_posix(),
+        language=transciption_cfg.language,
+        initial_prompt=transciption_cfg.initial_prompt,
+    )
     logger.debug(
-        "Detected language '%s' with probability %f" % (info.language, info.language_probability)
+        "Detected language '%s' with probability %f"
+        % (info.language, info.language_probability)
     )
     logger.debug("Finished transcription")
     return "".join(s.text for s in segments)
@@ -94,6 +98,8 @@ def main():
     socket.bind("tcp://*:5555")
     logger.debug("Server started")
 
+    cfg = load_config()
+
     while True:
         logger.debug(f"Waiting for message")
         message = socket.recv().decode("utf-8")
@@ -101,8 +107,8 @@ def main():
 
         match message:
             case "start":
-                wavfile = record()
-                tx = transcribe(wavfile)
+                wavfile = record(cfg)
+                tx = transcribe(wavfile, cfg)
                 logger.info(tx)
                 socket.send_string(tx)
             # case "get":
