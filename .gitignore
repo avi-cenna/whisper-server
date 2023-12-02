@@ -161,4 +161,4 @@ cython_debug/
 #.idea/
 
 # User config
-whisper-server/user_config.yml
+**/user_config.yml
