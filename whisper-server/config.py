@@ -10,6 +10,26 @@ import yaml
 from pydantic import BaseModel
 from typer import Argument, Option, Typer
 from typing_extensions import Annotated
+from loguru import logger
+
+from pathlib import Path
+
+
+def find_poetry_project_root(start_path='.'):
+    """
+    Find the root directory of a Poetry project by searching for the 'pyproject.toml' file.
+
+    :param start_path: The starting directory to begin the search. Defaults to the current directory.
+    :return: The path to the project root directory, if found; otherwise, None.
+    """
+    current_dir = Path(start_path).resolve()
+
+    while current_dir != current_dir.parent:
+        if (current_dir / 'pyproject.toml').is_file():
+            return current_dir
+        current_dir = current_dir.parent
+
+    return None
 
 
 # TODO: Consider adding some of the commented-out attributes below.
@@ -70,13 +90,23 @@ class Config(BaseModel):
     transcription_config: TranscriptionConfig
 
 
-def load_config():
-    config_file = Path("default_config.yml")
-    return Config.model_validate(yaml.safe_load(config_file.read_text()))
+def load_config() -> Config:
+    def parse_yml_config(p: Path):
+        return Config.model_validate(yaml.safe_load(p.read_text()))
+
+    project_dir = find_poetry_project_root(__file__)
+    default_config_file = project_dir / 'resources' / 'default_config.yml'
+    user_config_file = project_dir / 'resources' / 'user_config.yml'
+
+    if user_config_file.exists():
+        logger.debug(f"Loading user config from {user_config_file}")
+        return parse_yml_config(user_config_file)
+    else:
+        logger.debug(f"Loading default config from {default_config_file}")
+        return parse_yml_config(default_config_file)
 
 
 if __name__ == "__main__":
     c = load_config()
-    pprint(load_config())
     pprint(c.whisper_model_config)
     pass
