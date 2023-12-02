@@ -1,0 +1,10 @@
+silence_duration: 900
+
+whisper_model_config:
+  whisper_model_size: "medium"
+  device: "auto"
+  compute_type: "default"
+
+transcription_config:
+  language: "en"
+  initial_prompt: "Example prompt"

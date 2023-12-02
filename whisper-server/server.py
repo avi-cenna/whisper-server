@@ -1,4 +1,5 @@
 import os
+import threading
 import tempfile
 import wave
 
@@ -11,7 +12,6 @@ import zmq
 
 from faster_whisper import WhisperModel
 from loguru import logger
-
 
 
 def record(config=None) -> Path:
@@ -68,30 +68,23 @@ def record(config=None) -> Path:
         return Path(temp_audio_file.name)
 
 
-model_size = "medium.en"
-model_size = "tiny.en"
-model_size = "small.en"
-model = WhisperModel(model_size, compute_type="float32")
-
-
-def fw(waveform: np.ndarray | str):
+def transcribe(wavfile: Path):
+    # model_size = "medium.en"
+    # model_size = "tiny.en"
+    model_size = "small.en"
+    model = WhisperModel(model_size, compute_type="float32")
     # model_size_or_path: Size of the model to use (tiny, tiny.en, base, base.en,
     #  small, small.en, medium, medium.en, large-v1, large-v2, or large), a path to a converted
     #  model directory, or a CTranslate2-converted Whisper model ID from the Hugging Face Hub.
     #  When a size or a model ID is configured, the converted model is downloaded
     #  from the Hugging Face Hub.
-    logger.debug("Starting fw")
-
+    logger.debug("Starting transcription")
     init = """ """
-    segments, info = model.transcribe(waveform, language="en", initial_prompt=init)
-
-    print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
-
-    segments = list(segments)
-    for segment in segments:
-        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
-    logger.debug("Finished fw")
-    logger.debug(segments)
+    segments, info = model.transcribe(wavfile.as_posix(), language="en", initial_prompt=init)
+    logger.debug(
+        "Detected language '%s' with probability %f" % (info.language, info.language_probability)
+    )
+    logger.debug("Finished transcription")
     return "".join(s.text for s in segments)
 
 
@@ -104,24 +97,22 @@ def main():
     while True:
         logger.debug(f"Waiting for message")
         message = socket.recv().decode("utf-8")
-        print(f"Received request: {message}")
+        logger.debug(f"Received request: {message}")
 
         match message:
             case "start":
                 wavfile = record()
-                tx = fw(wavfile.as_posix())
+                tx = transcribe(wavfile)
                 logger.info(tx)
                 socket.send_string(tx)
+            # case "get":
+            #     socket.send_string(tx)
             # TODO: add support for stop here
             case _:
-                socket.send_string(f"Received invalid message: {message}")
+                # tx = transcribe(wavfile)
+                # socket.send_string(f"Received invalid message: {message}")
+                pass
 
 
 if __name__ == "__main__":
-    infile = Path("~/TODO/resources/jfk.wav").expanduser()
-    print(infile)
-    # fw(infile.as_posix())
-    # infile = record()
-    print(infile)
-    # fw(infile.as_posix())
     main()

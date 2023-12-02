@@ -28,7 +28,7 @@ def send():
 def test_transcription():
     """Test the transcription service."""
     infile = Path("~/TODO/jfk.wav").expanduser()
-    server.fw(infile.as_posix())
+    server.transcribe(infile.as_posix())
 
 
 if __name__ == "__main__":
