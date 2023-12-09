@@ -68,3 +68,10 @@ end
 -- Bind a hotkey to the zmqClientStart function
 hs.hotkey.bind("alt", "1", zmqClientStart)
 ```
+
+## Configuration
+The default configuration file is located at `resources/default_config.yaml`. This file can be overridden
+by creating a file in the same directory called `user_config.yaml`.
+
+## TODO
+ - Document configuration options
