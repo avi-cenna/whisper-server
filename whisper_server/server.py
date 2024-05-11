@@ -1,7 +1,9 @@
 import os
+import openai
 import queue
 import tempfile
 import threading
+import time
 import wave
 
 from pathlib import Path
@@ -77,13 +79,36 @@ def record(config: WhisperServerConfig) -> Path:
 
 def transcribe(wavfile: Path, config: WhisperServerConfig) -> str:
     """Transcribe an audio file and return the transcription."""
+    start = time.perf_counter()
+
+    if config.local:
+        result = transcribe_local(wavfile, config)
+    else:
+        result = transcribe_api(wavfile, config)
+    logger.success(result)
+
+    end = time.perf_counter()
+    logger.debug(f"Finished transcription in {end - start:.2f} seconds.")
+    # logger.debug(f"Finished transcription in {end - start:.2f} seconds. duration={info.duration:.2f}")
+    return result
+
+
+def transcribe_api(wavfile: Path, config: WhisperServerConfig) -> str:
+    result = openai.audio.transcriptions.create(file=wavfile,
+                                                model="whisper-1",
+                                                language="en",
+                                                response_format="text",
+                                                prompt=config.transcription_config.initial_prompt)
+    return str(result)
+
+
+def transcribe_local(wavfile: Path, config: WhisperServerConfig) -> str:
     model_cfg = config.whisper_model_config
     model = WhisperModel(
         model_cfg.whisper_model_size,
         device=model_cfg.device,
         compute_type=model_cfg.compute_type,
     )
-
     logger.debug("Starting transcription")
     transciption_cfg = config.transcription_config
     segments, info = model.transcribe(
@@ -94,8 +119,9 @@ def transcribe(wavfile: Path, config: WhisperServerConfig) -> str:
     logger.debug(
         "Detected language '%s' with probability %f" % (info.language, info.language_probability)
     )
-    logger.debug("Finished transcription")
-    return "".join(s.text for s in segments)
+    segments = list(segments)
+    result = "".join(s.text for s in segments)
+    return result
 
 
 def thread_record(config: WhisperServerConfig, result_queue):
@@ -143,6 +169,7 @@ def main():
 
                 # wavfile = record(cfg)
                 transcription = transcribe(wavfile, cfg)
+                transcription = transcription.strip() + " "
                 logger.info(transcription)
                 socket.send_string(transcription)
             # case "get":

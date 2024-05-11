@@ -79,6 +79,7 @@ class TranscriptionConfig(BaseModel):
 
 class WhisperServerConfig(BaseModel):
     silence_duration: int
+    local: bool
     whisper_model_config: WhisperModelConfig
     transcription_config: TranscriptionConfig
 

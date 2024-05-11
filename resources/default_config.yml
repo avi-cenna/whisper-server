@@ -1,4 +1,5 @@
 silence_duration: 900
+local: true
 
 whisper_model_config:
   whisper_model_size: "medium"
