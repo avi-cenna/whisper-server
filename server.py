@@ -28,7 +28,7 @@ def read_item3(item_id: int, q: str = None):
 
 @app.get("/error")
 def error():
-    time.sleep(.1)
+    time.sleep(0.1)
     raise Exception("This is an exception")
 
 

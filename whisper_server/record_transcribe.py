@@ -1,6 +1,9 @@
+import importlib
+import traceback
 import tempfile
 import time
 import wave
+
 from pathlib import Path
 from random import random
 from threading import Event
@@ -9,23 +12,34 @@ import numpy as np
 import openai
 import sounddevice as sd
 import webrtcvad
+
 from faster_whisper import WhisperModel
 from loguru import logger
 
 from whisper_server.config import WhisperServerConfig
 
 
-def try_record_audio(config: WhisperServerConfig, stop_recording_event: Event) -> Path | None:
+def try_record_audio(config: WhisperServerConfig, stop_recording_event: Event, attempt=0) -> Path | None:
     """Attempt to record an audio file and return the path to the file, or None if recording failed."""
-    logger.debug(f'sound devices = {sd.query_devices()}')
+    # importlib.reload(sd)  # this didn't work to avoid error on waking Mac
     try:
         return record_audio(config, stop_recording_event)
     except sd.PortAudioError as e:
         logger.error(f"Failed to record audio due to PortAudio error: {e}")
-        logger.debug(f'sound devices = {sd.query_devices()}')
+        traceback.print_tb(e.__traceback__)
+        _refresh_port_audio()
+        if attempt == 0:
+            return try_record_audio(config, stop_recording_event, attempt=1)
     except Exception as e:
         logger.error(f"Failed to record audio: {e}")
-        logger.debug(f'sound devices = {sd.query_devices()}')
+
+
+def _refresh_port_audio():
+    logger.debug(f"Refreshing PortAudio")
+    logger.debug(f"sound devices = {sd.query_devices()}")
+    sd._terminate()
+    sd._initialize()
+    logger.debug(f"sound devices = {sd.query_devices()}")
 
 
 def record_audio(config: WhisperServerConfig, stop_recording_event: Event) -> Path:
@@ -61,7 +75,7 @@ def record_audio(config: WhisperServerConfig, stop_recording_event: Event) -> Pa
             # is_speech = vad.is_speech(np.array(frame).tobytes(), sample_rate)
             is_speech = vad.is_speech(np.array(frame).tobytes(), sample_rate) or True
             if is_speech:
-                rand_debug(0.05, 'Speech detected')
+                rand_debug(0.05, "Speech detected")
                 recording.extend(frame)
                 num_silent_frames = 0
             else:
