@@ -1,10 +1,10 @@
 #!/usr/bin/env just --justfile
 
-serve-loop:
-  ./run_loop.sh
+# serve-loop:
+#  ./run_loop.sh
 
 serve:
-  poetry run python main.py 'serve'
+  python main.py 'serve'
 
 # send:
 #   poetry run python main.py send
