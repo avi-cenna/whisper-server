@@ -1,25 +1,13 @@
-[tool.poetry]
+[project]
 name = "whisper-server"
 version = "0.1.0"
 description = ""
-authors = ["N <47500890+avi-cenna@users.noreply.github.com>"]
+authors = [{name = "N",email = "47500890+avi-cenna@users.noreply.github.com"}]
 readme = "README.md"
+dependencies = ["faster-whisper>=1.0.2,<2.0.0", "loguru>=0.7.2,<0.8.0", "sounddevice>=0.4.6,<0.5.0", "webrtcvad>=2.0.10,<3.0.0", "pyzmq>=26.0.3,<27.0.0", "black>=24.4.2,<25.0.0", "isort>=5.12.0,<6.0.0", "pydantic>=2.5.2,<3.0.0", "pyyaml>=6.0.1,<7.0.0", "openai>=1.13.3,<2.0.0", "typer>=0.12.3,<0.13.0", "fastapi>=0.111.0,<0.112.0"]
+requires-python = ">=3.11"
 
-[tool.poetry.dependencies]
-python = ">=3.11"
-faster-whisper = "^1.0.2"
-loguru = "^0.7.2"
-sounddevice = "^0.4.6"
-webrtcvad = "^2.0.10"
-pyzmq = "^26.0.3"
-black = "^24.4.2"
-isort = "^5.12.0"
-pydantic = "^2.5.2"
-pyyaml = "^6.0.1"
-openai = "^1.13.3"
-typer = "^0.12.3"
-fastapi = "^0.111.0"
-
+[tool]
 [tool.black]
 line-length = 100
 
@@ -27,12 +15,17 @@ line-length = 100
 profile = "black"
 lines_between_types = 1
 
-[mypy]
-ignore_missing_imports = true
+[tool.rye]
+managed = true
+
+[tool.hatch]
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/whisper_server"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.scripts]
-whisper-server = "main:app"
