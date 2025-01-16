@@ -4,7 +4,7 @@
 #  ./run_loop.sh
 
 serve:
-  python main.py 'serve'
+  uv run python main.py 'serve'
 
 # send:
 #   poetry run python main.py send
