@@ -6,9 +6,9 @@ import uvicorn
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from loguru import logger
 
-from whisper_server.autocorrect import autocorrect
-from whisper_server.config import WhisperServerConfig, load_config
-from whisper_server.record_transcribe import record_audio, transcribe, try_record_audio
+from src.whisper_server.autocorrect import autocorrect
+from src.whisper_server.config import WhisperServerConfig, load_config
+from src.whisper_server.record_transcribe import record_audio, transcribe, try_record_audio
 
 stop_recording_event = threading.Event()
 cfg = load_config()
@@ -68,6 +68,8 @@ async def stop_recording():
         logger.info(transcription)
         return {"status": "recording stopped", "transcription": transcription}
     except Exception as e:
+        raise e
+        logger.error(e.__traceback__)
         logger.error(f"Failed to stop recording: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
