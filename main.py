@@ -12,7 +12,7 @@ def serve():
     # import whisper_server.server as server
 
     """Serve the Whisper transcription service, receiving ZMQ messages and returning transcriptions."""
-    from whisper_server import server
+    from src.whisper_server import server
 
     server.main()
 
