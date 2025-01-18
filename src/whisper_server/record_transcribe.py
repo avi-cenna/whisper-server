@@ -16,8 +16,19 @@ import webrtcvad
 from faster_whisper import WhisperModel
 from loguru import logger
 
-from whisper_server.config import WhisperServerConfig
+from src.whisper_server.config import WhisperServerConfig
 
+
+static_model = WhisperModel(
+    # model_cfg.whisper_model_size,
+    # model_size_or_path='turbo',
+    # model_size_or_path='large-v3-turbo',
+    model_size_or_path='medium.en',
+    # model_size_or_path='distil-medium.en',
+    device='cpu',
+    # compute_type=model_cfg.compute_type,
+    compute_type='float32',
+)
 
 def try_record_audio(config: WhisperServerConfig, stop_recording_event: Event, attempt=0) -> Path | None:
     """Attempt to record an audio file and return the path to the file, or None if recording failed."""
@@ -102,7 +113,8 @@ def transcribe(wavfile: Path, config: WhisperServerConfig) -> str:
     """Transcribe an audio file and return the transcription."""
     start = time.perf_counter()
 
-    if config.local:
+    if config.local or True:
+        logger.debug(f'Using local transcription')
         result = transcribe_local(wavfile, config)
     else:
         result = transcribe_api(wavfile, config)
@@ -127,11 +139,14 @@ def transcribe_api(wavfile: Path, config: WhisperServerConfig) -> str:
 
 def transcribe_local(wavfile: Path, config: WhisperServerConfig) -> str:
     model_cfg = config.whisper_model_config
-    model = WhisperModel(
-        model_cfg.whisper_model_size,
-        device=model_cfg.device,
-        compute_type=model_cfg.compute_type,
-    )
+    model=static_model
+    # model = WhisperModel(
+    #     model_cfg.whisper_model_size,
+        # 'large-v3-turbo',
+        # device=model_cfg.device,
+        # compute_type=model_cfg.compute_type,
+        # compute_type='float32',
+    # )
     logger.debug("Starting transcription")
     transciption_cfg = config.transcription_config
     segments, info = model.transcribe(
@@ -144,6 +159,7 @@ def transcribe_local(wavfile: Path, config: WhisperServerConfig) -> str:
     )
     segments = list(segments)
     result = "".join(s.text for s in segments)
+    logger.debug("Finished transcription")
     return result
 
 
