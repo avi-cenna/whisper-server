@@ -1,16 +1,19 @@
-import unittest
-from threading import Event, Thread
-from pathlib import Path
 import time
+import unittest
+from pathlib import Path
+from threading import Event, Thread
 
 from loguru import logger
 
+from src.whisper_server.record_transcribe import transcribe, try_record_audio
+
 # Assuming WhisperServerConfig is defined elsewhere and imported correctly
 from whisper_server.config import WhisperServerConfig, load_config
-from src.whisper_server.record_transcribe import try_record_audio, transcribe
 from whisper_server.record_transcribe import transcribe_api
 
 
+# TODO #12: change this test to be structured int he wayu of pytest
+#           - also, add a test for each of the models that I use in the file src/whisper_server/record_transcribe.py
 class TestRecordTranscribe(unittest.TestCase):
     def test_record_and_output_file(self):
         config = load_config()
@@ -33,11 +36,13 @@ class TestRecordTranscribe(unittest.TestCase):
 
         self.assertIsNotNone(recording_path, "Recording path should not be None")
         self.assertTrue(recording_path.is_file(), "Recorded file should exist")
-        self.assertGreater(recording_path.stat().st_size, 0, "Recorded file should not be empty")
+        self.assertGreater(
+            recording_path.stat().st_size, 0, "Recorded file should not be empty"
+        )
 
     def test_2(self):
         self.assertEqual(1, 1)
-        p = Path('/var/folders/6w/cj1n3wl15js15p7xrn235cfh0000gp/T/tmp64bzdwic.wav')
+        p = Path("/var/folders/6w/cj1n3wl15js15p7xrn235cfh0000gp/T/tmp64bzdwic.wav")
         self.assertTrue(p.is_file())
         t = transcribe_api(p, load_config())
         print(t)
@@ -45,12 +50,12 @@ class TestRecordTranscribe(unittest.TestCase):
 
     def test_3(self):
         self.assertEqual(1, 1)
-        p = Path('/var/folders/6w/cj1n3wl15js15p7xrn235cfh0000gp/T/tmp64bzdwic.wav')
+        p = Path("/var/folders/6w/cj1n3wl15js15p7xrn235cfh0000gp/T/tmp64bzdwic.wav")
         self.assertTrue(p.is_file())
         t = transcribe(p, load_config())
         print(t)
         logger.debug(t)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
