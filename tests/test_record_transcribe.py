@@ -1,61 +1,67 @@
 import time
-import unittest
 from pathlib import Path
 from threading import Event, Thread
 
+import pytest
 from loguru import logger
 
-from src.whisper_server.record_transcribe import transcribe, try_record_audio
+from src.whisper_server.config import load_config
+from src.whisper_server.record_transcribe import (
+    transcribe,
+    transcribe_api,
+    try_record_audio,
+)
 
-# Assuming WhisperServerConfig is defined elsewhere and imported correctly
-from whisper_server.config import WhisperServerConfig, load_config
-from whisper_server.record_transcribe import transcribe_api
+SAMPLE_MODELS = [
+    "mlx-community/whisper-large-v3-turbo",
+    "mlx-community/whisper-large-v3-turbo-q4",
+    "mlx-community/whisper-tiny.en-mlx",
+]
 
+@pytest.fixture
+def config():
+    return load_config()
 
-# TODO #12: change this test to be structured int he wayu of pytest
-#           - also, add a test for each of the models that I use in the file src/whisper_server/record_transcribe.py
-class TestRecordTranscribe(unittest.TestCase):
-    def test_record_and_output_file(self):
-        config = load_config()
-        stop_event = Event()
+@pytest.fixture
+def audio_recording(config):
+    """Create a test audio recording"""
+    stop_event = Event()
+    
+    def record():
+        return try_record_audio(config, stop_event)
+    
+    recording_thread = Thread(target=record)
+    recording_thread.start()
+    
+    # Record for 5 seconds
+    time.sleep(5)
+    stop_event.set()
+    recording_thread.join()
+    
+    recording_path = record()
+    assert recording_path is not None
+    assert recording_path.is_file()
+    
+    yield recording_path
+    # Cleanup
+    recording_path.unlink(missing_ok=True)
 
-        def record():
-            return try_record_audio(config, stop_event)
+def test_record_and_output_file(audio_recording):
+    """Test that audio recording creates a valid file"""
+    assert audio_recording.stat().st_size > 0
 
-        recording_thread = Thread(target=record)
-        recording_thread.start()
+@pytest.mark.parametrize("model", SAMPLE_MODELS)
+def test_transcribe_with_models(config, audio_recording, model):
+    """Test transcription with different whisper models"""
+    config.whisper_model_config.model = model
+    result = transcribe(audio_recording, config)
+    assert isinstance(result, str)
+    assert len(result) > 0
+    logger.info(f"Transcription result for {model}: {result}")
 
-        time.sleep(5)  # Record for 5 seconds
-        stop_event.set()  # Signal to stop recording
-
-        recording_thread.join()  # Wait for the thread to finish
-
-        # Assuming try_record_audio returns a path or None if it fails
-        recording_path = record()
-        logger.info(f"Recording path: {recording_path}")
-
-        self.assertIsNotNone(recording_path, "Recording path should not be None")
-        self.assertTrue(recording_path.is_file(), "Recorded file should exist")
-        self.assertGreater(
-            recording_path.stat().st_size, 0, "Recorded file should not be empty"
-        )
-
-    def test_2(self):
-        self.assertEqual(1, 1)
-        p = Path("/var/folders/6w/cj1n3wl15js15p7xrn235cfh0000gp/T/tmp64bzdwic.wav")
-        self.assertTrue(p.is_file())
-        t = transcribe_api(p, load_config())
-        print(t)
-        logger.debug(t)
-
-    def test_3(self):
-        self.assertEqual(1, 1)
-        p = Path("/var/folders/6w/cj1n3wl15js15p7xrn235cfh0000gp/T/tmp64bzdwic.wav")
-        self.assertTrue(p.is_file())
-        t = transcribe(p, load_config())
-        print(t)
-        logger.debug(t)
-
-
-if __name__ == "__main__":
-    unittest.main()
+def test_transcribe_api(config, audio_recording):
+    """Test transcription using the OpenAI API"""
+    result = transcribe_api(audio_recording, config)
+    assert isinstance(result, str)
+    assert len(result) > 0
+    logger.info(f"API transcription result: {result}")
