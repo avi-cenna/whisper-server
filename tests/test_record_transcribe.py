@@ -28,6 +28,7 @@ def audio_recording(config):
     stop_event = Event()
     
     def record():
+        logger.warning("Recording audio")
         return try_record_audio(config, stop_event)
     
     recording_thread = Thread(target=record)
@@ -37,7 +38,10 @@ def audio_recording(config):
     time.sleep(5)
     stop_event.set()
     recording_thread.join()
-    
+
+    # TODO: for AI Aider
+    #   I think something might be wonky here. Is it ok that we're calling this func after
+    #   the thread has already joined?
     recording_path = record()
     assert recording_path is not None
     assert recording_path.is_file()
@@ -50,6 +54,9 @@ def test_record_and_output_file(audio_recording):
     """Test that audio recording creates a valid file"""
     assert audio_recording.stat().st_size > 0
 
+
+# TODO
+#  - disable this test
 @pytest.mark.parametrize("model", SAMPLE_MODELS)
 def test_transcribe_with_models(config, audio_recording, model):
     """Test transcription with different whisper models"""
@@ -59,6 +66,8 @@ def test_transcribe_with_models(config, audio_recording, model):
     assert len(result) > 0
     logger.info(f"Transcription result for {model}: {result}")
 
+# TODO
+#  - disable this test
 def test_transcribe_api(config, audio_recording):
     """Test transcription using the OpenAI API"""
     result = transcribe_api(audio_recording, config)
