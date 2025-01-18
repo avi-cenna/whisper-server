@@ -13,7 +13,7 @@ import openai
 import sounddevice as sd
 import webrtcvad
 
-# from faster_whisper import WhisperModel
+from whisperplus.pipelines import mlx_whisper
 from loguru import logger
 
 from src.whisper_server.config import WhisperServerConfig
@@ -35,16 +35,11 @@ from src.whisper_server.config import WhisperServerConfig
 # print(text)
 
 
-static_model = WhisperModel(
-    # model_cfg.whisper_model_size,
-    # model_size_or_path='turbo',
-    # model_size_or_path='large-v3-turbo',
-    model_size_or_path='medium.en',
-    # model_size_or_path='distil-medium.en',
-    device='cpu',
-    # compute_type=model_cfg.compute_type,
-    compute_type='float32',
-)
+# Initialize the whisper model
+def initialize_model():
+    return mlx_whisper(path_or_hf_repo="mlx-community/whisper-large-v3-turbo-q4")
+
+static_model = initialize_model()
 
 def try_record_audio(config: WhisperServerConfig, stop_recording_event: Event, attempt=0) -> Path | None:
     """Attempt to record an audio file and return the path to the file, or None if recording failed."""
@@ -155,14 +150,7 @@ def transcribe_api(wavfile: Path, config: WhisperServerConfig) -> str:
 
 def transcribe_local(wavfile: Path, config: WhisperServerConfig) -> str:
     model_cfg = config.whisper_model_config
-    model=static_model
-    # model = WhisperModel(
-    #     model_cfg.whisper_model_size,
-        # 'large-v3-turbo',
-        # device=model_cfg.device,
-        # compute_type=model_cfg.compute_type,
-        # compute_type='float32',
-    # )
+    model = static_model
     logger.debug("Starting transcription")
     transciption_cfg = config.transcription_config
     segments, info = model.transcribe(
