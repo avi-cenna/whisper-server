@@ -1,14 +1,19 @@
 import queue
 import threading
+from pathlib import Path
 
+import mlx_whisper
 import uvicorn
-
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from loguru import logger
 
 from src.whisper_server.autocorrect import autocorrect
 from src.whisper_server.config import WhisperServerConfig, load_config
-from src.whisper_server.record_transcribe import record_audio, transcribe, try_record_audio
+from src.whisper_server.record_transcribe import (
+    record_audio,
+    transcribe,
+    try_record_audio,
+)
 
 stop_recording_event = threading.Event()
 cfg = load_config()
@@ -17,6 +22,12 @@ result_queue = queue.Queue()
 
 app = FastAPI()
 
+# TODO: adjust this so that it's an enum class
+SAMPLE_MODELS = [
+    "mlx-community/whisper-large-v3-turbo",
+    "mlx-community/whisper-large-v3-turbo-q4",
+    "mlx-community/whisper-tiny.en-mlx",
+]
 
 # def thread_record_dep(config: WhisperServerConfig, result_queue):
 #     try:
@@ -63,10 +74,12 @@ async def stop_recording():
         logger.debug(f"Recorded audio is saved at: {wavfile}")
 
         transcription = transcribe(wavfile, cfg)
-        transcription = autocorrect(transcription)
-        transcription = transcription.strip() + " "
+        # transcription = autocorrect(transcription)
+        # transcription = transcription.strip() + " "
         logger.info(transcription)
-        return {"status": "recording stopped", "transcription": transcription}
+
+        return {"status": "recording stopped", "transcription": "foo"}
+        # return {"status": "recording stopped", "transcription": transcription}
     except Exception as e:
         raise e
         logger.error(e.__traceback__)
@@ -74,6 +87,25 @@ async def stop_recording():
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         stop_recording_event.clear()
+
+# TODO: adjust this func to return a new Pydantic model that has the text (string)
+#       and the time it took to transcribe (int) in milliseconds
+@app.get("/demo")
+def demo(model:str = "mlx-community/whisper-large-v3-turbo") -> str:
+    logger.debug(f"{stop_recording_event=}")
+    ar = Path('./samples/jfk.wav')
+    logger.debug("Starting transcription")
+    result = mlx_whisper.transcribe(
+        ar.as_posix(),
+        path_or_hf_repo=model,
+        initial_prompt='',
+        language='en',
+    )
+    result = result["text"]
+    # TODO: add info about timing here. how long did it take?
+    logger.debug("Finished transcription")
+    logger.info(f'Transcription result for {model}: {result}')
+    return result
 
 
 def main():
