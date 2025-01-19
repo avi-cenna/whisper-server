@@ -29,15 +29,14 @@ class WhisperModel(str, Enum):
     LARGE_V3_TURBO = "mlx-community/whisper-large-v3-turbo"
     LARGE_V3_TURBO_Q4 = "mlx-community/whisper-large-v3-turbo-q4"
     TINY_EN = "mlx-community/whisper-tiny.en-mlx"
-    # TODO: add more models to the enum
-    # mlx-community/whisper-base.en-mlx-q4
-    # mlx-community/whisper-medium-mlx
-    # mlx-community/whisper-medium-mlx-q4
-    # mlx-community/whisper-medium-mlx-fp32
-    # mlx-community/whisper-medium.en-mlx
-    # mlx-community/whisper-medium.en-mlx-4bit
-    # mlx-community/whisper-medium.en-mlx-fp32
-    # mlx-community/whisper-medium.en-mlx-8bit
+    BASE_EN_Q4 = "mlx-community/whisper-base.en-mlx-q4"
+    MEDIUM = "mlx-community/whisper-medium-mlx"
+    MEDIUM_Q4 = "mlx-community/whisper-medium-mlx-q4"
+    MEDIUM_FP32 = "mlx-community/whisper-medium-mlx-fp32"
+    MEDIUM_EN = "mlx-community/whisper-medium.en-mlx"
+    MEDIUM_EN_4BIT = "mlx-community/whisper-medium.en-mlx-4bit"
+    MEDIUM_EN_FP32 = "mlx-community/whisper-medium.en-mlx-fp32"
+    MEDIUM_EN_8BIT = "mlx-community/whisper-medium.en-mlx-8bit"
 
 # def thread_record_dep(config: WhisperServerConfig, result_queue):
 #     try:
