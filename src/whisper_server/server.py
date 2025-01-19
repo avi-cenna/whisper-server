@@ -25,12 +25,10 @@ result_queue = queue.Queue()
 
 app = FastAPI()
 
-# TODO: adjust this so that it's an enum class
-SAMPLE_MODELS = [
-    "mlx-community/whisper-large-v3-turbo",
-    "mlx-community/whisper-large-v3-turbo-q4",
-    "mlx-community/whisper-tiny.en-mlx",
-]
+class WhisperModel(str, Enum):
+    LARGE_V3_TURBO = "mlx-community/whisper-large-v3-turbo"
+    LARGE_V3_TURBO_Q4 = "mlx-community/whisper-large-v3-turbo-q4"
+    TINY_EN = "mlx-community/whisper-tiny.en-mlx"
 
 # def thread_record_dep(config: WhisperServerConfig, result_queue):
 #     try:
