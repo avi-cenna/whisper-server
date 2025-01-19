@@ -1,8 +1,11 @@
 import queue
 import threading
+import time
+from enum import Enum
 from pathlib import Path
 
 import mlx_whisper
+from pydantic import BaseModel
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from loguru import logger
@@ -88,24 +91,30 @@ async def stop_recording():
     finally:
         stop_recording_event.clear()
 
-# TODO: adjust this func to return a new Pydantic model that has the text (string)
-#       and the time it took to transcribe (int) in milliseconds
+class TranscriptionResult(BaseModel):
+    text: str
+    duration_ms: int
+
 @app.get("/demo")
-def demo(model:str = "mlx-community/whisper-large-v3-turbo") -> str:
+def demo(model: WhisperModel = WhisperModel.LARGE_V3_TURBO) -> TranscriptionResult:
     logger.debug(f"{stop_recording_event=}")
     ar = Path('./samples/jfk.wav')
     logger.debug("Starting transcription")
+    
+    start_time = time.time()
     result = mlx_whisper.transcribe(
         ar.as_posix(),
-        path_or_hf_repo=model,
+        path_or_hf_repo=model.value,
         initial_prompt='',
         language='en',
     )
-    result = result["text"]
-    # TODO: add info about timing here. how long did it take?
+    duration_ms = int((time.time() - start_time) * 1000)
+    
+    text = result["text"]
     logger.debug("Finished transcription")
-    logger.info(f'Transcription result for {model}: {result}')
-    return result
+    logger.info(f'Transcription result for {model}: {text}')
+    
+    return TranscriptionResult(text=text, duration_ms=duration_ms)
 
 
 def main():
