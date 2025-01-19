@@ -29,9 +29,15 @@ fmt:
   uv run isort .
 
 bench:
-#TODO: add more models to this hyperfine command
-#      - also, make it so that each one is run 4 times.
-  hyperfine \
+  hyperfine --runs 4 \
     'curl localhost:8000/demo?model="mlx-community/whisper-large-v3-turbo"' \
     'curl localhost:8000/demo?model="mlx-community/whisper-large-v3-turbo-q4"' \
-    'curl localhost:8000/demo?model="mlx-community/whisper-tiny.en-mlx"'
+    'curl localhost:8000/demo?model="mlx-community/whisper-tiny.en-mlx"' \
+    'curl localhost:8000/demo?model="mlx-community/whisper-base.en-mlx-q4"' \
+    'curl localhost:8000/demo?model="mlx-community/whisper-medium-mlx"' \
+    'curl localhost:8000/demo?model="mlx-community/whisper-medium-mlx-q4"' \
+    'curl localhost:8000/demo?model="mlx-community/whisper-medium-mlx-fp32"' \
+    'curl localhost:8000/demo?model="mlx-community/whisper-medium.en-mlx"' \
+    'curl localhost:8000/demo?model="mlx-community/whisper-medium.en-mlx-4bit"' \
+    'curl localhost:8000/demo?model="mlx-community/whisper-medium.en-mlx-fp32"' \
+    'curl localhost:8000/demo?model="mlx-community/whisper-medium.en-mlx-8bit"'
