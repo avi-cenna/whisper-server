@@ -1,9 +1,7 @@
-import importlib
-import traceback
 import tempfile
 import time
+import traceback
 import wave
-
 from pathlib import Path
 from random import random
 from threading import Event
@@ -12,13 +10,10 @@ import numpy as np
 import openai
 import sounddevice as sd
 import webrtcvad
-
-from whisperplus.pipelines import mlx_whisper
 from loguru import logger
 
 from src.whisper_server.config import WhisperServerConfig
-
-# TODO: #12 instead of faster whisper i want to use whisper mlx. See example below
+from src.whisper_server.whisper_backend import MlxWhisperBackend, TranscriptionResult
 
 # and i want to try this model
 # mlx-community/whisper-large-v3-turbo-q4
@@ -36,14 +31,17 @@ from src.whisper_server.config import WhisperServerConfig
 
 
 # Initialize the whisper model
-def initialize_model():
-    return mlx_whisper(path_or_hf_repo="mlx-community/whisper-large-v3-turbo-q4")
+# def initialize_model():
+#     return mlx_whisper(path_or_hf_repo="mlx-community/whisper-large-v3-turbo-q4")
 
-static_model = initialize_model()
+# static_model = initialize_model()
 
-def try_record_audio(config: WhisperServerConfig, stop_recording_event: Event, attempt=0) -> Path | None:
+
+# def try_record_audio(config: WhisperServerConfig, stop_recording_event: Event, attempt=0) -> Path | None:
+def try_record_audio(
+    config: WhisperServerConfig, stop_recording_event: Event, attempt=0
+):
     """Attempt to record an audio file and return the path to the file, or None if recording failed."""
-    # importlib.reload(sd)  # this didn't work to avoid error on waking Mac
     try:
         return record_audio(config, stop_recording_event)
     except sd.PortAudioError as e:
@@ -71,11 +69,11 @@ def record_audio(config: WhisperServerConfig, stop_recording_event: Event) -> Pa
     silence_frames_threshold = silence_duration // frame_duration
 
     with sd.InputStream(
-            samplerate=sample_rate,
-            channels=1,
-            dtype="int16",
-            blocksize=sample_rate * frame_duration // 1000,
-            callback=lambda indata, frames, _time, status: buffer.extend(indata[:, 0]),
+        samplerate=sample_rate,
+        channels=1,
+        dtype="int16",
+        blocksize=sample_rate * frame_duration // 1000,
+        callback=lambda indata, frames, _time, status: buffer.extend(indata[:, 0]),
     ):
         while True and not stop_recording_event.is_set():
             # logger.debug("Continuing recording")
@@ -84,7 +82,7 @@ def record_audio(config: WhisperServerConfig, stop_recording_event: Event) -> Pa
                 continue
 
             frame = buffer[: sample_rate * frame_duration // 1000]
-            buffer = buffer[sample_rate * frame_duration // 1000:]
+            buffer = buffer[sample_rate * frame_duration // 1000 :]
 
             # is_speech = vad.is_speech(np.array(frame).tobytes(), sample_rate)
             is_speech = vad.is_speech(np.array(frame).tobytes(), sample_rate) or True
@@ -120,15 +118,16 @@ def _refresh_port_audio():
     logger.debug(f"sound devices = {sd.query_devices()}")
 
 
-def transcribe(wavfile: Path, config: WhisperServerConfig) -> str:
+def transcribe(wavfile: Path, config: WhisperServerConfig) -> TranscriptionResult:
     """Transcribe an audio file and return the transcription."""
     start = time.perf_counter()
 
     if config.local or True:
-        logger.debug(f'Using local transcription')
-        result = transcribe_local(wavfile, config)
+        logger.debug(f"Using local transcription")
+        result = transcribe_local2(wavfile, config)
     else:
-        result = transcribe_api(wavfile, config)
+        # result = transcribe_api(wavfile, config)
+        result = TranscriptionResult(text="todo implement", duration_ms=0)
     logger.success(result)
 
     end = time.perf_counter()
@@ -148,18 +147,49 @@ def transcribe_api(wavfile: Path, config: WhisperServerConfig) -> str:
     return str(result)
 
 
+def transcribe_local2(
+    wavfile: Path, config: WhisperServerConfig
+) -> TranscriptionResult:
+    backend = MlxWhisperBackend()
+    return backend.transcribe(wavfile)
+
+
 def transcribe_local(wavfile: Path, config: WhisperServerConfig) -> str:
+    import mlx_whisper
+
     model_cfg = config.whisper_model_config
-    model = static_model
+    # model = static_model
     logger.debug("Starting transcription")
     transciption_cfg = config.transcription_config
-    segments, info = model.transcribe(
+    result = mlx_whisper.transcribe(
         wavfile.as_posix(),
-        language=transciption_cfg.language,
+        # path_or_hf_repo='mlx-community/whisper-large-v3-turbo-q4',
+        # path_or_hf_repo='mlx-community/whisper-tiny.en-mlx',
+        path_or_hf_repo="mlx-community/whisper-large-v3-turbo",
+        # language=transciption_cfg.language,
+        initial_prompt=transciption_cfg.initial_prompt,
+    )
+    result = result["text"]
+    logger.debug("Finished transcription")
+    print(result)
+    return result
+
+
+def transcribe_local_old(wavfile: Path, config: WhisperServerConfig) -> str:
+    import mlx_whisper
+
+    model_cfg = config.whisper_model_config
+    # model = static_model
+    logger.debug("Starting transcription")
+    transciption_cfg = config.transcription_config
+    segments, info = mlx_whisper.transcribe(
+        wavfile.as_posix(),
+        # language=transciption_cfg.language,
         initial_prompt=transciption_cfg.initial_prompt,
     )
     logger.debug(
-        "Detected language '%s' with probability %f" % (info.language, info.language_probability)
+        "Detected language '%s' with probability %f"
+        % (info.language, info.language_probability)
     )
     segments = list(segments)
     result = "".join(s.text for s in segments)

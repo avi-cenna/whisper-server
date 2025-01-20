@@ -5,10 +5,10 @@ from enum import Enum
 from pathlib import Path
 
 import mlx_whisper
-from pydantic import BaseModel
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from loguru import logger
+from pydantic import BaseModel
 
 from src.whisper_server.autocorrect import autocorrect
 from src.whisper_server.config import WhisperServerConfig, load_config
@@ -25,18 +25,20 @@ result_queue = queue.Queue()
 
 app = FastAPI()
 
+
 class WhisperModel(str, Enum):
-    LARGE_V3_TURBO = "mlx-community/whisper-large-v3-turbo"
-    LARGE_V3_TURBO_Q4 = "mlx-community/whisper-large-v3-turbo-q4"
     TINY_EN = "mlx-community/whisper-tiny.en-mlx"
     BASE_EN_Q4 = "mlx-community/whisper-base.en-mlx-q4"
     MEDIUM = "mlx-community/whisper-medium-mlx"
-    MEDIUM_Q4 = "mlx-community/whisper-medium-mlx-q4"
-    MEDIUM_FP32 = "mlx-community/whisper-medium-mlx-fp32"
     MEDIUM_EN = "mlx-community/whisper-medium.en-mlx"
     MEDIUM_EN_4BIT = "mlx-community/whisper-medium.en-mlx-4bit"
-    MEDIUM_EN_FP32 = "mlx-community/whisper-medium.en-mlx-fp32"
     MEDIUM_EN_8BIT = "mlx-community/whisper-medium.en-mlx-8bit"
+    MEDIUM_EN_FP32 = "mlx-community/whisper-medium.en-mlx-fp32"
+    MEDIUM_FP32 = "mlx-community/whisper-medium-mlx-fp32"
+    MEDIUM_Q4 = "mlx-community/whisper-medium-mlx-q4"
+    LARGE_V3_TURBO = "mlx-community/whisper-large-v3-turbo"
+    LARGE_V3_TURBO_Q4 = "mlx-community/whisper-large-v3-turbo-q4"
+
 
 # def thread_record_dep(config: WhisperServerConfig, result_queue):
 #     try:
@@ -46,6 +48,7 @@ class WhisperModel(str, Enum):
 #         result_queue.put(e)
 
 
+# TODO: Add the Fizzbuzz result here and make sure you're using the Ader AI cloud component with Anthropic AI.! Then you might want to try using ChatGPTBPT04 which is coming from OpenAI.
 def thread_record(config: WhisperServerConfig):
     result = try_record_audio(config, stop_recording_event)
     result_queue.put(result)
@@ -83,43 +86,45 @@ async def stop_recording():
         logger.debug(f"Recorded audio is saved at: {wavfile}")
 
         transcription = transcribe(wavfile, cfg)
-        # transcription = autocorrect(transcription)
-        # transcription = transcription.strip() + " "
+        transcription = autocorrect(transcription.text)
+        transcription = transcription.strip() + " "
+        transcription = transcription[0].upper() + transcription[1:]
         logger.info(transcription)
 
-        return {"status": "recording stopped", "transcription": "foo"}
-        # return {"status": "recording stopped", "transcription": transcription}
+        # return {"status": "recording stopped", "transcription": "foo"}
+        return {"status": "recording stopped", "transcription": transcription}
     except Exception as e:
-        raise e
         logger.error(e.__traceback__)
         logger.error(f"Failed to stop recording: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         stop_recording_event.clear()
 
+
 class TranscriptionResult(BaseModel):
     text: str
     duration_ms: int
 
+
 @app.get("/demo")
 def demo(model: WhisperModel = WhisperModel.LARGE_V3_TURBO) -> TranscriptionResult:
     logger.debug(f"{stop_recording_event=}")
-    ar = Path('./samples/jfk.wav')
+    ar = Path("./samples/jfk.wav")
     logger.debug("Starting transcription")
-    
+
     start_time = time.time()
     result = mlx_whisper.transcribe(
         ar.as_posix(),
         path_or_hf_repo=model.value,
-        initial_prompt='',
-        language='en',
+        initial_prompt="",
+        language="en",
     )
     duration_ms = int((time.time() - start_time) * 1000)
-    
+
     text = result["text"]
     logger.debug("Finished transcription")
-    logger.info(f'Transcription result for {model}: {text}')
-    
+    logger.info(f"Transcription result for {model}: {text}")
+
     return TranscriptionResult(text=text, duration_ms=duration_ms)
 
 

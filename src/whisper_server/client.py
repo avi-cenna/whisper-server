@@ -1,5 +1,4 @@
 import zmq
-
 from loguru import logger
 
 

@@ -3,7 +3,6 @@ from pprint import pprint
 from typing import List, Literal, Optional, Union
 
 import yaml
-
 from loguru import logger
 from pydantic import BaseModel
 
