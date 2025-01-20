@@ -41,3 +41,16 @@ bench:
     'curl localhost:8000/demo?model="mlx-community/whisper-medium.en-mlx-4bit"' \
     'curl localhost:8000/demo?model="mlx-community/whisper-medium.en-mlx-fp32"' \
     'curl localhost:8000/demo?model="mlx-community/whisper-medium.en-mlx-8bit"'
+
+demo:
+  xh get 'localhost:8000/demo?model=mlx-community/whisper-large-v3-turbo'
+  xh get 'localhost:8000/demo?model=mlx-community/whisper-large-v3-turbo-q4'
+  xh get 'localhost:8000/demo?model=mlx-community/whisper-tiny.en-mlx'
+  xh get 'localhost:8000/demo?model=mlx-community/whisper-base.en-mlx-q4'
+  -xh get 'localhost:8000/demo?model=mlx-community/whisper-medium-mlx'
+  -xh get 'localhost:8000/demo?model=mlx-community/whisper-medium-mlx-q4'
+  -xh get 'localhost:8000/demo?model=mlx-community/whisper-medium-mlx-fp32'
+  xh get 'localhost:8000/demo?model=mlx-community/whisper-medium.en-mlx'
+  xh get 'localhost:8000/demo?model=mlx-community/whisper-medium.en-mlx-4bit'
+  -xh get 'localhost:8000/demo?model=mlx-community/whisper-medium.en-mlx-fp32'
+  xh get 'localhost:8000/demo?model=mlx-community/whisper-medium.en-mlx-8bit'
