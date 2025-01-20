@@ -3,15 +3,17 @@ name = "whisper-server"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 dependencies = [
     "fastapi>=0.115.6",
-    "faster-whisper>=1.1.1",
     "loguru>=0.7.3",
-    "numpy>=2.2.1",
+    "mlx-whisper>=0.4.1",
+    "numpy>=2.0.2",
+    # "fastapi>=0.115.6",
+    # "loguru>=0.7.3",
+    # "numpy>=2.2.1",
     "openai>=1.59.7",
     "pip>=24.3.1",
-    "pip-system-certs>=4.0",
     "pydantic>=2.10.5",
     "pyyaml>=6.0.2",
     "sounddevice>=0.5.1",
@@ -24,4 +26,8 @@ dependencies = [
 dev = [
     "black>=24.10.0",
     "isort>=5.13.2",
+    "pytest>=8.3.4",
 ]
+
+[tool.isort]
+profile = "black"
