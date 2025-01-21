@@ -46,7 +46,7 @@ class MlxWhisperBackend(WhisperBackend):
         start_time = time.perf_counter()
         result = mlx_whisper.transcribe(
             wavfile.as_posix(),
-            path_or_hf_repo=WhisperModel.LARGE_V3_TURBO,
+            path_or_hf_repo=WhisperModel.MEDIUM_EN,
             initial_prompt="",
             language="en",
         )

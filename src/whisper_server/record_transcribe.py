@@ -150,6 +150,7 @@ def transcribe_api(wavfile: Path, config: WhisperServerConfig) -> str:
 def transcribe_local2(
     wavfile: Path, config: WhisperServerConfig
 ) -> TranscriptionResult:
+    logger.debug("Using local transcription")
     backend = MlxWhisperBackend()
     return backend.transcribe(wavfile)
 
