@@ -3,7 +3,7 @@ name = "whisper-server"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "fastapi>=0.115.6",
     "loguru>=0.7.3",
@@ -16,7 +16,7 @@ dependencies = [
     "sounddevice>=0.5.1",
     "typer>=0.15.1",
     "uvicorn>=0.34.0",
-    "webrtcvad>=2.0.10",
+    "webrtcvad>=2.0.10", 
 ]
 
 [dependency-groups]
@@ -25,6 +25,24 @@ dev = [
     "isort>=5.13.2",
     "pytest>=8.3.4",
 ]
+faster-whisper = ["faster-whisper"]
 
 [tool.isort]
 profile = "black"
+
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+whisper-server = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
+
+[tool.pixi.tasks]
+
+[tool.pixi.dependencies]
+json5 = ">=0.10.0,<0.11"
+pixi-pycharm = ">=0.0.8,<0.0.9"

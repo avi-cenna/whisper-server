@@ -164,3 +164,7 @@ cython_debug/
 **/user_config.yml
 **/.autocorrect*
 .aider*
+
+# pixi environments
+.pixi
+*.egg-info
