@@ -1,13 +1,16 @@
 {
     silence_duration: 900,
     local: true,
-    whisper_model_config: {
-        whisper_model_size: "medium",
+    language: "en",
+    initial_prompt: "Example prompt",
+    mlx_whisper_config: {
+        model: "medium",
         device: "auto",
-        compute_type: "default"
+        compute_type: "default",
     },
-    transcription_config: {
-        language: "en",
-        initial_prompt: "Example prompt"
-    }
+    faster_whisper_config: {
+        model: "medium",
+        device: "auto",
+        compute_type: "default",
+    },
 }
