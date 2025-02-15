@@ -25,9 +25,8 @@ def find_project_root(start_path="."):
     return None
 
 
-# TODO: Consider adding some of the commented-out attributes below.
-class WhisperModelConfig(BaseModel):
-    whisper_model_size: Literal[
+class FasterWhisperConfig(BaseModel):
+    model: Literal[
         "tiny",
         "tiny.en",
         "base",
@@ -42,6 +41,7 @@ class WhisperModelConfig(BaseModel):
     ]
     device: str = "auto"
     compute_type: str = "default"
+    # TODO: Consider adding some of the commented-out attributes below.
     # cpu_threads: int = 0
     # num_workers: int = 1
     # download_root: Optional[str] = None
@@ -80,8 +80,10 @@ class TranscriptionConfig(BaseModel):
 class WhisperServerConfig(BaseModel):
     silence_duration: int
     local: bool
-    whisper_model_config: WhisperModelConfig
-    transcription_config: TranscriptionConfig
+    language: Optional[str]
+    initial_prompt: Optional[str]
+    faster_whisper_config: FasterWhisperConfig
+    # transcription_config: TranscriptionConfig
 
 
 def load_config() -> WhisperServerConfig:
@@ -94,13 +96,15 @@ def load_config() -> WhisperServerConfig:
 
     if user_config_file.exists():
         logger.debug(f"Loading user config from {user_config_file}")
-        return parse_json5_config(user_config_file)
-    else:
-        logger.debug(f"Loading default config from {default_config_file}")
-        return parse_json5_config(default_config_file)
+        try:
+            return parse_json5_config(user_config_file)
+        except Exception as e:
+            logger.error(f"Failed to load user config: {e}")
+    logger.debug(f"Loading default config from {default_config_file}")
+    return parse_json5_config(default_config_file)
 
 
 if __name__ == "__main__":
     c = load_config()
-    pprint(c.whisper_model_config)
+    pprint(c.model_dump())
     pass

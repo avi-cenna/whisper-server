@@ -2,12 +2,16 @@ import time
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
+from typing import Type
 
+from faster_whisper import WhisperModel
 from loguru import logger
+
 from pydantic import BaseModel
+from src.whisper_server.config import WhisperServerConfig
 
 
-class WhisperModel(str, Enum):
+class WhisperModelName(str, Enum):
     LARGE_V3_TURBO = "mlx-community/whisper-large-v3-turbo"
     LARGE_V3_TURBO_Q4 = "mlx-community/whisper-large-v3-turbo-q4"
     TINY_EN = "mlx-community/whisper-tiny.en-mlx"
@@ -28,14 +32,35 @@ class TranscriptionResult(BaseModel):
 
 class WhisperBackend(ABC):
     @abstractmethod
-    # maybe add config param later
+    def __init__(self, config: WhisperServerConfig):
+        self.config = config
+
+    @staticmethod
+    @abstractmethod
+    def backend_name() -> str:
+        pass
+
+    @abstractmethod
     def transcribe(self, wavfile: Path) -> TranscriptionResult:
         pass
 
 
+def get_backend_class(backend_name: str) -> Type[WhisperBackend]:
+    subclasses = WhisperBackend.__subclasses__()
+    for subclass in subclasses:
+        if subclass.backend_name() == backend_name:
+            return subclass
+    raise ValueError(f"Unknown backend: {backend_name}")
+
+
 class MlxWhisperBackend(WhisperBackend):
-    def __init__(self):
+    def __init__(self, config: WhisperServerConfig):
         self.temp = 1
+        self.config = config
+
+    @staticmethod
+    def backend_name() -> str:
+        return "mlx-whisper"
 
     def transcribe(self, wavfile: Path) -> TranscriptionResult:
         import mlx_whisper
@@ -46,7 +71,7 @@ class MlxWhisperBackend(WhisperBackend):
         start_time = time.perf_counter()
         result = mlx_whisper.transcribe(
             wavfile.as_posix(),
-            path_or_hf_repo=WhisperModel.MEDIUM_EN,
+            path_or_hf_repo=WhisperModelName.MEDIUM_EN,
             initial_prompt="",
             language="en",
         )
@@ -58,10 +83,48 @@ class MlxWhisperBackend(WhisperBackend):
         return TranscriptionResult(text=text, duration_ms=duration_ms)
 
 
+class FasterWhisperBackend(WhisperBackend):
+    def __init__(self, config: WhisperServerConfig):
+        self.temp = 1
+        self.config = config
+
+    @staticmethod
+    def backend_name() -> str:
+        return "faster-whisper"
+
+    def transcribe(self, wavfile: Path) -> str:
+        model_cfg = self.config.faster_whisper_config
+        model = WhisperModel(
+            model_cfg.model,
+            device=model_cfg.device,
+            compute_type=model_cfg.compute_type,
+        )
+        logger.debug("Starting transcription")
+        segments, info = model.transcribe(
+            wavfile.as_posix(),
+            language=self.config.language,
+            initial_prompt=self.config.initial_prompt
+        )
+        logger.debug(
+            "Detected language '%s' with probability %f" % (info.language, info.language_probability)
+        )
+        segments = list(segments)
+        result = "".join(s.text for s in segments)
+        return result
+
+
 class OpenAIWhisperBackend(WhisperBackend):
     """
     Backend for using the OpenAI API for transcription.
     """
+
+    def __init__(self, config: WhisperServerConfig):
+        self.temp = 1
+        self.config = config
+
+    @staticmethod
+    def backend_name() -> str:
+        return "openai-whisper"
 
     def transcribe(self, wavfile: Path) -> TranscriptionResult:
         # TODO: Implement this

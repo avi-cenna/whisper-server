@@ -3,6 +3,7 @@ import threading
 import time
 from enum import Enum
 from pathlib import Path
+from typing import Optional
 
 import mlx_whisper
 import uvicorn
@@ -17,6 +18,7 @@ from src.whisper_server.record_transcribe import (
     transcribe,
     try_record_audio,
 )
+from src.whisper_server.whisper_backend import get_backend_class
 
 stop_recording_event = threading.Event()
 cfg = load_config()
@@ -105,10 +107,11 @@ class TranscriptionResult(BaseModel):
     text: str
     duration_ms: int
 
+
 @app.get("/transcribe")
 def transcribe_audio(
-    wavfile: Path,
-    model: WhisperModel = WhisperModel.LARGE_V3_TURBO,
+        wavfile: Path,
+        model: WhisperModel = WhisperModel.LARGE_V3_TURBO,
 ):
     logger.debug(f"{stop_recording_event=}")
     logger.debug(f"{wavfile=}")
@@ -129,19 +132,17 @@ def transcribe_audio(
 
     return TranscriptionResult(text=text, duration_ms=duration_ms)
 
+
 @app.get("/demo")
-def demo(model: WhisperModel = WhisperModel.LARGE_V3_TURBO) -> TranscriptionResult:
+def demo(model: Optional[str]) -> TranscriptionResult:
     logger.debug(f"{stop_recording_event=}")
     ar = Path("./samples/jfk.wav")
     logger.debug("Starting transcription")
 
     start_time = time.time()
-    result = mlx_whisper.transcribe(
-        ar.as_posix(),
-        path_or_hf_repo=model.value,
-        initial_prompt="",
-        language="en",
-    )
+    clazz = get_backend_class("faster-whisper")
+    backend = clazz(cfg)
+    result = backend.transcribe(ar)
     duration_ms = int((time.time() - start_time) * 1000)
 
     text = result["text"]

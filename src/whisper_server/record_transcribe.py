@@ -158,7 +158,7 @@ def transcribe_local2(
 def transcribe_local(wavfile: Path, config: WhisperServerConfig) -> str:
     import mlx_whisper
 
-    model_cfg = config.whisper_model_config
+    model_cfg = config.faster_whisper_config
     # model = static_model
     logger.debug("Starting transcription")
     transciption_cfg = config.transcription_config
@@ -179,7 +179,7 @@ def transcribe_local(wavfile: Path, config: WhisperServerConfig) -> str:
 def transcribe_local_old(wavfile: Path, config: WhisperServerConfig) -> str:
     import mlx_whisper
 
-    model_cfg = config.whisper_model_config
+    model_cfg = config.faster_whisper_config
     # model = static_model
     logger.debug("Starting transcription")
     transciption_cfg = config.transcription_config
