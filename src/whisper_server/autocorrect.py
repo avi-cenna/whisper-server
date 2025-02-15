@@ -9,7 +9,7 @@ _capitalize = [
 
 from loguru import logger
 
-from .config import find_poetry_project_root
+from .config import find_project_root
 
 
 def autocorrect(transcript: str):
@@ -29,7 +29,7 @@ class Autocorrection(BaseModel):
 
 
 def parse_autocorrect_file() -> list[Autocorrection]:
-    infile = find_poetry_project_root() / ".autocorrect"
+    infile = find_project_root() / ".autocorrect"
     if not infile.exists():
         logger.warning(f"No autocorrect file found at {infile}")
         return []

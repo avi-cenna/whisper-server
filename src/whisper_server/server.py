@@ -105,6 +105,29 @@ class TranscriptionResult(BaseModel):
     text: str
     duration_ms: int
 
+@app.get("/transcribe")
+def transcribe_audio(
+    wavfile: Path,
+    model: WhisperModel = WhisperModel.LARGE_V3_TURBO,
+):
+    logger.debug(f"{stop_recording_event=}")
+    logger.debug(f"{wavfile=}")
+    logger.debug(f"{model=}")
+
+    start_time = time.time()
+    result = mlx_whisper.transcribe(
+        wavfile.as_posix(),
+        path_or_hf_repo=model.value,
+        initial_prompt="",
+        language="en",
+    )
+    duration_ms = int((time.time() - start_time) * 1000)
+
+    text = result["text"]
+    logger.debug("Finished transcription")
+    logger.info(f"Transcription result for {model}: {text}")
+
+    return TranscriptionResult(text=text, duration_ms=duration_ms)
 
 @app.get("/demo")
 def demo(model: WhisperModel = WhisperModel.LARGE_V3_TURBO) -> TranscriptionResult:

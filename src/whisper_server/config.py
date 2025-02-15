@@ -5,9 +5,10 @@ from typing import List, Literal, Optional, Union
 import yaml
 from loguru import logger
 from pydantic import BaseModel
+import json5
 
 
-def find_poetry_project_root(start_path="."):
+def find_project_root(start_path="."):
     """
     Find the root directory of a Poetry project by searching for the 'pyproject.toml' file.
 
@@ -84,19 +85,19 @@ class WhisperServerConfig(BaseModel):
 
 
 def load_config() -> WhisperServerConfig:
-    def parse_yml_config(p: Path):
-        return WhisperServerConfig.model_validate(yaml.safe_load(p.read_text()))
+    def parse_json5_config(p: Path):
+        return WhisperServerConfig.model_validate(json5.loads(p.read_text()))
 
-    project_dir = find_poetry_project_root(__file__)
-    default_config_file = project_dir / "resources" / "default_config.yml"
-    user_config_file = project_dir / "resources" / "user_config.yml"
+    project_dir = find_project_root(__file__)
+    default_config_file = project_dir / "resources" / "default_config.json5"
+    user_config_file = project_dir / "resources" / "user_config.json5"
 
     if user_config_file.exists():
         logger.debug(f"Loading user config from {user_config_file}")
-        return parse_yml_config(user_config_file)
+        return parse_json5_config(user_config_file)
     else:
         logger.debug(f"Loading default config from {default_config_file}")
-        return parse_yml_config(default_config_file)
+        return parse_json5_config(default_config_file)
 
 
 if __name__ == "__main__":
