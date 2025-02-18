@@ -1,5 +1,7 @@
 #!/usr/bin/env just --justfile
 
+set ignore-comments := true
+
 # serve-loop:
 #  ./run_loop.sh
 

@@ -6,8 +6,8 @@ from typing import Type
 
 from faster_whisper import WhisperModel
 from loguru import logger
-
 from pydantic import BaseModel
+
 from src.whisper_server.config import WhisperServerConfig
 
 
@@ -33,7 +33,7 @@ class TranscriptionResult(BaseModel):
 class WhisperBackend(ABC):
     @abstractmethod
     def __init__(self, config: WhisperServerConfig):
-        self.config = config
+        pass
 
     @staticmethod
     @abstractmethod
@@ -55,7 +55,6 @@ def get_backend_class(backend_name: str) -> Type[WhisperBackend]:
 
 class MlxWhisperBackend(WhisperBackend):
     def __init__(self, config: WhisperServerConfig):
-        self.temp = 1
         self.config = config
 
     @staticmethod
@@ -93,6 +92,9 @@ class FasterWhisperBackend(WhisperBackend):
         return "faster-whisper"
 
     def transcribe(self, wavfile: Path) -> str:
+        # tiny, tiny. en, base, base. en, small, small. en, distil-small. en,
+        # medium, medium. en, distil-medium. en, large-v1, large-v2, large-v3, large,
+        # distil-large-v2, distil-large-v3, large-v3-turbo, or turbo
         model_cfg = self.config.faster_whisper_config
         model = WhisperModel(
             model_cfg.model,
@@ -103,10 +105,11 @@ class FasterWhisperBackend(WhisperBackend):
         segments, info = model.transcribe(
             wavfile.as_posix(),
             language=self.config.language,
-            initial_prompt=self.config.initial_prompt
+            initial_prompt=self.config.initial_prompt,
         )
         logger.debug(
-            "Detected language '%s' with probability %f" % (info.language, info.language_probability)
+            "Detected language '%s' with probability %f"
+            % (info.language, info.language_probability)
         )
         segments = list(segments)
         result = "".join(s.text for s in segments)

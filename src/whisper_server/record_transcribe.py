@@ -122,12 +122,11 @@ def transcribe(wavfile: Path, config: WhisperServerConfig) -> TranscriptionResul
     """Transcribe an audio file and return the transcription."""
     start = time.perf_counter()
 
-    if config.local or True:
+    if config.local:
         logger.debug(f"Using local transcription")
         result = transcribe_local2(wavfile, config)
     else:
-        # result = transcribe_api(wavfile, config)
-        result = TranscriptionResult(text="todo implement", duration_ms=0)
+        result = transcribe_api(wavfile, config)
     logger.success(result)
 
     end = time.perf_counter()
@@ -136,22 +135,24 @@ def transcribe(wavfile: Path, config: WhisperServerConfig) -> TranscriptionResul
     return result
 
 
-def transcribe_api(wavfile: Path, config: WhisperServerConfig) -> str:
+def transcribe_api(wavfile: Path, config: WhisperServerConfig) -> TranscriptionResult:
+    start = time.perf_counter()
     result = openai.audio.transcriptions.create(
         file=wavfile,
         model="whisper-1",
-        language="en",
+        language=config.language,
         response_format="text",
-        prompt=config.transcription_config.initial_prompt,
+        prompt=config.initial_prompt,
     )
-    return str(result)
+    duration_ms = int((time.perf_counter() - start) * 1000)
+    return TranscriptionResult(text=str(result), duration_ms=duration_ms)
 
 
 def transcribe_local2(
     wavfile: Path, config: WhisperServerConfig
 ) -> TranscriptionResult:
     logger.debug("Using local transcription")
-    backend = MlxWhisperBackend()
+    backend = MlxWhisperBackend(config)
     return backend.transcribe(wavfile)
 
 

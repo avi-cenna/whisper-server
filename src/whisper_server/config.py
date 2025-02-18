@@ -2,10 +2,10 @@ from pathlib import Path
 from pprint import pprint
 from typing import List, Literal, Optional, Union
 
+import json5
 import yaml
 from loguru import logger
 from pydantic import BaseModel
-import json5
 
 
 def find_project_root(start_path="."):
@@ -26,21 +26,14 @@ def find_project_root(start_path="."):
 
 
 class FasterWhisperConfig(BaseModel):
-    model: Literal[
-        "tiny",
-        "tiny.en",
-        "base",
-        "base.en",
-        "small",
-        "small.en",
-        "medium",
-        "medium.en",
-        "large-v1",
-        "large-v2",
-        "large",
-    ]
+    model: str
+    """The model to use for transcription. Can be one of tiny, tiny.en, base, base.en,
+    small, small.en, distil-small.en, medium, medium.en, distil-medium.en, large-v1, 
+    large-v2, large-v3, large, distil-large-v2, distil-large-v3, large-v3-turbo, or turbo"""
     device: str = "auto"
+    """The device to use for computation."""
     compute_type: str = "default"
+    """The type of computation to use."""
     # TODO: Consider adding some of the commented-out attributes below.
     # cpu_threads: int = 0
     # num_workers: int = 1

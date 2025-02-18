@@ -110,8 +110,8 @@ class TranscriptionResult(BaseModel):
 
 @app.get("/transcribe")
 def transcribe_audio(
-        wavfile: Path,
-        model: WhisperModel = WhisperModel.LARGE_V3_TURBO,
+    wavfile: Path,
+    model: WhisperModel = WhisperModel.LARGE_V3_TURBO,
 ):
     logger.debug(f"{stop_recording_event=}")
     logger.debug(f"{wavfile=}")

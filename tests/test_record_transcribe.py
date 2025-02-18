@@ -12,6 +12,7 @@ from src.whisper_server.record_transcribe import (
     transcribe_api,
     try_record_audio,
 )
+from whisper_server.whisper_backend import get_backend_class
 
 SAMPLE_MODELS = [
     "mlx-community/whisper-large-v3-turbo",
@@ -72,6 +73,19 @@ def test_transcribe_with_models(config, model):
     logger.info(f"Transcription result for {model}: {result}")
 
 
+def test_transcribe_with_faster_whisper(config):
+    """Test transcription with different whisper models"""
+    model_name = config.faster_whisper_config.model
+    logger.debug(f"Starting transcription with model: {model_name}")
+    wavfile = find_project_root() / Path("samples/jfk.wav")
+    assert wavfile.is_file()
+    backend = get_backend_class("faster-whisper")(config)
+    result = backend.transcribe(wavfile)
+    assert isinstance(result, str)
+    assert len(result) > 0
+    logger.info(f"Transcription result for {model_name}: {result}")
+
+
 @pytest.mark.skip
 def test_transcribe_api(config, audio_recording):
     """Test transcription using the OpenAI API"""
@@ -94,3 +108,20 @@ def ttranscribe_local(wavfile: Path, model: str) -> str:
     logger.debug("Finished transcription")
     print(result)
     return result
+
+
+def find_project_root(start_path="."):
+    """
+    Find the root directory of a Poetry project by searching for the 'pyproject.toml' file.
+
+    :param start_path: The starting directory to begin the search. Defaults to the current directory.
+    :return: The path to the project root directory, if found; otherwise, None.
+    """
+    current_dir = Path(start_path).resolve()
+
+    while current_dir != current_dir.parent:
+        if (current_dir / "pyproject.toml").is_file():
+            return current_dir
+        current_dir = current_dir.parent
+
+    return None

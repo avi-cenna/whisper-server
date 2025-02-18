@@ -9,8 +9,8 @@
         compute_type: "default",
     },
     faster_whisper_config: {
-        model: "medium",
+        model: "large-v3-turbo",
         device: "auto",
-        compute_type: "default",
+        compute_type: "float32",
     },
 }
